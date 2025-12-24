@@ -187,6 +187,6 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
           </Link>
         )}
       </div>
-    </header>
+    </header> 
   );
 };
