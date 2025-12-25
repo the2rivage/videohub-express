@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/authStore";
 import { useVideoStore } from "@/store/videoStore";
+import vstreamLogo from "@/assets/vstream-logo.png";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -41,21 +42,14 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <Link to="/" className="flex items-center gap-1">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              className="w-5 h-5 text-primary-foreground"
-            >
-              <path
-                d="M9.5 8.5L15.5 12L9.5 15.5V8.5Z"
-                fill="currentColor"
-              />
-            </svg>
-          </div>
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src={vstreamLogo}
+            alt="VStream"
+            className="w-8 h-8 object-contain"
+          />
           <span className="text-xl font-bold text-foreground hidden sm:block">
-            ViewTube
+            VStream
           </span>
         </Link>
       </div>
