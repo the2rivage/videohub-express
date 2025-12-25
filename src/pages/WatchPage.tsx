@@ -7,7 +7,9 @@ import {
   Download,
   MoreHorizontal,
   Bell,
-  Check,
+  Flag,
+  ListPlus,
+  Clock,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
@@ -15,6 +17,12 @@ import { VideoCard } from "@/components/video/VideoCard";
 import { CommentSection } from "@/components/video/CommentSection";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { mockVideos, formatViews, formatTimeAgo } from "@/data/mockData";
 import { useVideoStore } from "@/store/videoStore";
 import { useAuthStore } from "@/store/authStore";
@@ -190,9 +198,39 @@ const WatchPage = () => {
                     Download
                   </Button>
 
-                  <Button variant="secondary" size="icon" className="rounded-full">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="secondary" size="icon" className="rounded-full">
+                        <MoreHorizontal className="w-5 h-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      align="end" 
+                      className="w-48 bg-card border-border z-50"
+                    >
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => toast({ title: "Added to Watch Later" })}
+                      >
+                        <Clock className="w-4 h-4" />
+                        Save to Watch Later
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => toast({ title: "Added to Playlist" })}
+                      >
+                        <ListPlus className="w-4 h-4" />
+                        Add to Playlist
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={() => toast({ title: "Thank you for reporting", description: "We'll review this video" })}
+                      >
+                        <Flag className="w-4 h-4" />
+                        Report
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 

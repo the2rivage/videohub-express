@@ -8,9 +8,18 @@ import {
   Settings,
   SkipBack,
   SkipForward,
+  Check,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
@@ -29,6 +38,11 @@ export const VideoPlayer = ({ videoUrl, thumbnail, title }: VideoPlayerProps) =>
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [quality, setQuality] = useState("Auto");
+
+  const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+  const qualities = ["Auto", "1080p", "720p", "480p", "360p"];
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -106,6 +120,13 @@ export const VideoPlayer = ({ videoUrl, thumbnail, title }: VideoPlayerProps) =>
   const skip = (seconds: number) => {
     if (videoRef.current) {
       videoRef.current.currentTime += seconds;
+    }
+  };
+
+  const changePlaybackSpeed = (speed: number) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      setPlaybackSpeed(speed);
     }
   };
 
@@ -219,13 +240,45 @@ export const VideoPlayer = ({ videoUrl, thumbnail, title }: VideoPlayerProps) =>
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/20"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20"
+                >
+                  <Settings className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-48 bg-zinc-900 border-zinc-700 text-white z-50"
+              >
+                <DropdownMenuLabel className="text-zinc-400">Playback Speed</DropdownMenuLabel>
+                {speeds.map((speed) => (
+                  <DropdownMenuItem
+                    key={speed}
+                    onClick={() => changePlaybackSpeed(speed)}
+                    className="flex items-center justify-between cursor-pointer hover:bg-zinc-800"
+                  >
+                    <span>{speed === 1 ? "Normal" : `${speed}x`}</span>
+                    {playbackSpeed === speed && <Check className="w-4 h-4" />}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator className="bg-zinc-700" />
+                <DropdownMenuLabel className="text-zinc-400">Quality</DropdownMenuLabel>
+                {qualities.map((q) => (
+                  <DropdownMenuItem
+                    key={q}
+                    onClick={() => setQuality(q)}
+                    className="flex items-center justify-between cursor-pointer hover:bg-zinc-800"
+                  >
+                    <span>{q}</span>
+                    {quality === q && <Check className="w-4 h-4" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="ghost"
               size="icon"
