@@ -15,7 +15,7 @@ interface CommentSectionProps {
 export const CommentSection = ({ videoId, commentCount = 0 }: CommentSectionProps) => {
   const [newComment, setNewComment] = useState("");
   const [showInput, setShowInput] = useState(false);
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, profile, isAuthenticated } = useAuthStore();
 
   const handleSubmit = () => {
     if (newComment.trim()) {
@@ -35,7 +35,7 @@ export const CommentSection = ({ videoId, commentCount = 0 }: CommentSectionProp
       {/* Add comment */}
       <div className="flex gap-3 mb-6">
         <Avatar className="w-10 h-10">
-          <AvatarImage src={user?.avatar} />
+          <AvatarImage src={profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`} />
           <AvatarFallback>U</AvatarFallback>
         </Avatar>
         <div className="flex-1">

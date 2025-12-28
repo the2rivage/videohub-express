@@ -16,11 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, profile, isAuthenticated, logout } = useAuthStore();
   const { likedVideos } = useVideoStore();
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState(user?.username || "");
-  const [description, setDescription] = useState(user?.description || "");
+  const [username, setUsername] = useState(profile?.username || "");
+  const [description, setDescription] = useState(profile?.description || "");
   const [isSaving, setIsSaving] = useState(false);
 
   if (!isAuthenticated) {
@@ -58,8 +58,8 @@ const ProfilePage = () => {
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
           <div className="relative group">
             <img
-              src={user?.avatar}
-              alt={user?.username}
+              src={profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
+              alt={profile?.username || 'User'}
               className="w-28 h-28 rounded-full object-cover border-4 border-border"
             />
             <button className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -69,11 +69,11 @@ const ProfilePage = () => {
 
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-foreground">
-              {user?.username}
+              {profile?.username || 'User'}
             </h1>
             <p className="text-muted-foreground text-sm mt-1">{user?.email}</p>
             <p className="text-muted-foreground text-sm mt-2 max-w-lg">
-              {user?.description}
+              {profile?.description || 'No description yet'}
             </p>
             <div className="flex gap-3 mt-4">
               <Button
