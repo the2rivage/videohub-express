@@ -21,7 +21,7 @@ interface HeaderProps {
 export const Header = ({ onMenuToggle }: HeaderProps) => {
   const [searchValue, setSearchValue] = useState("");
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, profile, isAuthenticated, logout } = useAuthStore();
   const { setSearchQuery } = useVideoStore();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -114,8 +114,8 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
                   className="relative h-8 w-8 rounded-full"
                 >
                   <img
-                    src={user?.avatar}
-                    alt={user?.username}
+                    src={profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
+                    alt={profile?.username || 'User'}
                     className="h-8 w-8 rounded-full object-cover"
                   />
                 </Button>
@@ -126,13 +126,13 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
               >
                 <div className="flex items-center gap-3 p-3">
                   <img
-                    src={user?.avatar}
-                    alt={user?.username}
+                    src={profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id}`}
+                    alt={profile?.username || 'User'}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      {user?.username}
+                      {profile?.username || 'User'}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {user?.email}

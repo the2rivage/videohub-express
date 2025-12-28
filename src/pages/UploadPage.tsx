@@ -17,11 +17,12 @@ import { Progress } from "@/components/ui/progress";
 import { categories } from "@/data/mockData";
 import { useAuthStore } from "@/store/authStore";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const UploadPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -43,7 +44,7 @@ const UploadPage = () => {
             Sign in to upload
           </h1>
           <p className="text-muted-foreground mb-4 text-center max-w-md">
-            You need to be signed in to upload videos to ViewTube.
+            You need to be signed in to upload videos to VStream.
           </p>
           <Button onClick={() => navigate("/login")}>Sign in</Button>
         </div>
@@ -79,7 +80,7 @@ const UploadPage = () => {
   };
 
   const handleUpload = async () => {
-    if (!videoFile || !title || !category) {
+    if (!videoFile || !title || !category || !user) {
       toast({
         title: "Missing information",
         description: "Please fill in all required fields",
@@ -91,27 +92,82 @@ const UploadPage = () => {
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 300);
+    try {
+      const userId = user.id;
+      const timestamp = Date.now();
+      const videoExt = videoFile.name.split('.').pop();
+      const videoPath = `${userId}/${timestamp}.${videoExt}`;
 
-    // Simulate upload completion
-    setTimeout(() => {
-      clearInterval(interval);
+      // Upload video
+      setUploadProgress(10);
+      const { error: videoError } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, videoFile);
+
+      if (videoError) throw videoError;
+      setUploadProgress(50);
+
+      // Get video URL
+      const { data: { publicUrl: videoUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(videoPath);
+
+      // Upload thumbnail if provided
+      let thumbnailUrl = null;
+      if (thumbnailFile) {
+        const thumbExt = thumbnailFile.name.split('.').pop();
+        const thumbPath = `${userId}/${timestamp}.${thumbExt}`;
+        
+        const { error: thumbError } = await supabase.storage
+          .from('thumbnails')
+          .upload(thumbPath, thumbnailFile);
+
+        if (thumbError) throw thumbError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('thumbnails')
+          .getPublicUrl(thumbPath);
+        
+        thumbnailUrl = publicUrl;
+      }
+      setUploadProgress(70);
+
+      // Parse tags
+      const tagsArray = tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+
+      // Save video metadata to database
+      const { error: dbError } = await supabase.from('videos').insert({
+        user_id: userId,
+        title,
+        description,
+        video_url: videoUrl,
+        thumbnail_url: thumbnailUrl,
+        category,
+        tags: tagsArray,
+        duration: '0:00', // Would need video duration detection
+      });
+
+      if (dbError) throw dbError;
       setUploadProgress(100);
+
       toast({
         title: "Video uploaded!",
         description: "Your video has been uploaded successfully.",
       });
+      
       setTimeout(() => navigate("/"), 1500);
-    }, 3500);
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -166,6 +222,7 @@ const UploadPage = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setVideoFile(null)}
+                  disabled={isUploading}
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -306,7 +363,7 @@ const UploadPage = () => {
 
           {/* Submit */}
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
-            <Button variant="ghost" onClick={() => navigate("/")}>
+            <Button variant="ghost" onClick={() => navigate("/")} disabled={isUploading}>
               Cancel
             </Button>
             <Button
